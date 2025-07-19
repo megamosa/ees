@@ -1,0 +1,693 @@
+<?php
+/**
+ * MagoArab_EasYorder Quick Order Template (Clean Version)
+ *
+ * @category    MagoArab
+ * @package     MagoArab_EasYorder
+ * @author      MagoArab Development Team
+ * @copyright   Copyright (c) 2025 MagoArab
+ * @license     https://opensource.org/licenses/MIT MIT License
+ */
+
+/* @var $block \MagoArab\EasYorder\Block\Product\QuickOrder */
+
+if (!$block->canShowQuickOrder()) {
+    return;
+}
+
+$product = $block->getCurrentProduct();
+if (!$product) {
+    return;
+}
+?>
+
+<link rel="stylesheet" type="text/css" href="<?= $block->getViewFileUrl('MagoArab_EasYorder::css/easyorder.css') ?>">
+
+<div class="easyorder-container" id="easyorder-form-container">
+    <div class="easyorder-header">
+        <h3 class="easyorder-title"><?= $block->escapeHtml($block->getFormTitle()) ?></h3>
+        <p class="easyorder-subtitle"><?= __('أسرع طريقة لإتمام الطلب') ?></p>
+    </div>
+
+    <form id="easyorder-form" method="post" novalidate="novalidate">
+        <input type="hidden" name="form_key" value="<?= $block->escapeHtmlAttr($block->getFormKey()) ?>">
+        <input type="hidden" name="product_id" value="<?= $block->escapeHtmlAttr($product->getId()) ?>">
+
+        <div class="easyorder-form-content">
+            <!-- Product Info Section -->
+            <div class="easyorder-product-info">
+                <div class="product-summary">
+                    <span class="product-name"><?= $block->escapeHtml($product->getName()) ?></span>
+                    <span class="product-price" id="unit-price" data-price="<?= $block->getCurrentProductPrice() ?>"><?= $block->getCurrentProductFormattedPrice() ?></span>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="easyorder-section">
+                <h4 class="section-title"><?= __('معلومات العميل') ?></h4>
+                <div class="field-group">
+                    <div class="field required">
+                        <label for="customer_name" class="label">
+                            <span><?= __('الاسم بالكامل') ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="text" 
+                                   id="customer_name" 
+                                   name="customer_name" 
+                                   class="input-text required-entry" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('أدخل اسمك بالكامل')) ?>"
+                                   required>
+                        </div>
+                    </div>
+                    
+                    <div class="field required">
+                        <label for="customer_phone" class="label">
+                            <span><?= __('رقم الهاتف') ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="tel" 
+                                   id="customer_phone" 
+                                   name="customer_phone" 
+                                   class="input-text required-entry" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('أدخل رقم هاتفك')) ?>"
+                                   required>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label for="customer_email" class="label">
+                            <span><?= __('البريد الإلكتروني (اختياري)') ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="email" 
+                                   id="customer_email" 
+                                   name="customer_email" 
+                                   class="input-text" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('أدخل بريدك الإلكتروني')) ?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Address Information -->
+            <div class="easyorder-section">
+                <h4 class="section-title"><?= __('معلومات التوصيل') ?></h4>
+                <div class="field-group">
+                    <!-- Country -->
+                    <div class="field required">
+                        <label for="country_id" class="label">
+                            <span><?= __('الدولة') ?></span>
+                        </label>
+                        <div class="control">
+                            <select id="country_id" name="country_id" class="select required-entry" required>
+                                <option value=""><?= __('اختر الدولة') ?></option>
+                                <?php foreach ($block->getCountries() as $country): ?>
+                                    <option value="<?= $block->escapeHtmlAttr($country['value']) ?>"
+                                            <?= $country['value'] === $block->getDefaultCountry() ? 'selected' : '' ?>>
+                                        <?= $block->escapeHtml($country['label']) ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Region/State -->
+                    <div class="field required">
+                        <label for="region_id" class="label">
+                            <span><?= __('المنطقة/المحافظة') ?></span>
+                        </label>
+                        <div class="control">
+                            <select id="region_id" name="region_id" class="select" style="display: none;">
+                                <option value=""><?= __('اختر المنطقة') ?></option>
+                            </select>
+                            <input type="text" 
+                                   id="region" 
+                                   name="region" 
+                                   class="input-text" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('أدخل المنطقة')) ?>"
+                                   style="display: none;">
+                        </div>
+                    </div>
+
+                    <!-- City -->
+                    <div class="field required">
+                        <label for="city" class="label">
+                            <span><?= __('المدينة') ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="text" 
+                                   id="city" 
+                                   name="city" 
+                                   class="input-text required-entry" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('أدخل اسم المدينة')) ?>"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Street Address -->
+                    <div class="field required">
+                        <label for="street_1" class="label">
+                            <span><?= __('العنوان - السطر الأول') ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="text" 
+                                   id="street_1" 
+                                   name="street[]" 
+                                   class="input-text required-entry" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('رقم المبنى، اسم الشارع')) ?>"
+                                   required>
+                        </div>
+                    </div>
+
+                    <!-- Street Address Line 2 -->
+                    <div class="field">
+                        <label for="street_2" class="label">
+                            <span><?= __('العنوان - السطر الثاني (اختياري)') ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="text" 
+                                   id="street_2" 
+                                   name="street[]" 
+                                   class="input-text" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('الشقة، الطابق، معلومات إضافية')) ?>">
+                        </div>
+                    </div>
+
+                    <!-- Postcode -->
+                    <div class="field" id="postcode-field">
+                        <label for="postcode" class="label">
+                            <span><?= __('الرمز البريدي') ?></span>
+                        </label>
+                        <div class="control">
+                            <input type="text" 
+                                   id="postcode" 
+                                   name="postcode" 
+                                   class="input-text" 
+                                   placeholder="<?= $block->escapeHtmlAttr(__('أدخل الرمز البريدي')) ?>">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quantity -->
+            <div class="easyorder-section">
+                <h4 class="section-title"><?= __('تفاصيل الطلب') ?></h4>
+                <div class="field-group">
+                    <div class="field required">
+                        <label for="easyorder_qty" class="label">
+                            <span><?= __('عدد القطع') ?></span>
+                        </label>
+                        <div class="control">
+                            <div class="qty-container">
+                                <button type="button" class="qty-btn minus" data-action="minus">-</button>
+                                <input type="number" 
+                                       id="easyorder_qty" 
+                                       name="qty" 
+                                       value="1" 
+                                       min="1" 
+                                       class="input-text qty-input required-entry" 
+                                       required>
+                                <button type="button" class="qty-btn plus" data-action="plus">+</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Methods -->
+            <div class="easyorder-section" id="shipping-section" style="display: none;">
+                <h4 class="section-title"><?= __('طريقة الشحن') ?></h4>
+                <div class="field-group">
+                    <div class="field required">
+                        <div class="control">
+                            <div id="shipping-methods-container">
+                                <div class="loading-message"><?= __('جارٍ تحميل طرق الشحن...') ?></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Methods -->
+            <div class="easyorder-section">
+                <h4 class="section-title"><?= __('طريقة الدفع') ?></h4>
+                <div class="field-group">
+                    <div class="field required">
+                        <div class="control">
+                            <div class="payment-methods">
+                                <?php $paymentMethods = $block->getAvailablePaymentMethods(); ?>
+                                <?php if (!empty($paymentMethods)): ?>
+                                    <?php foreach ($paymentMethods as $method): ?>
+                                        <label class="payment-method">
+                                            <input type="radio" 
+                                                   name="payment_method" 
+                                                   value="<?= $block->escapeHtmlAttr($method['code']) ?>" 
+                                                   class="payment-radio"
+                                                   <?= $method['code'] === 'cashondelivery' ? 'checked' : '' ?>>
+                                            <span class="payment-label">
+                                                <?= $block->escapeHtml($method['title']) ?>
+                                            </span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                <?php else: ?>
+                                    <div class="no-payment-methods">
+                                        <p><?= __('لا توجد طرق دفع متاحة حالياً') ?></p>
+                                    </div>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="easyorder-section" id="order-summary-section">
+                <h4 class="section-title"><?= __('ملخص الطلب') ?></h4>
+                <div class="order-summary">
+                    <div class="summary-row">
+                        <span class="label"><?= __('سعر الوحدة:') ?></span>
+                        <span class="value" id="unit-price-display"><?= $block->getCurrentProductFormattedPrice() ?></span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label"><?= __('الكمية:') ?></span>
+                        <span class="value" id="qty-display">1</span>
+                    </div>
+                    <div class="summary-row">
+                        <span class="label"><?= __('المجموع الفرعي:') ?></span>
+                        <span class="value" id="product-subtotal"><?= $block->getCurrentProductFormattedPrice() ?></span>
+                    </div>
+                    <div class="summary-row" id="shipping-cost-row" style="display: none;">
+                        <span class="label"><?= __('تكلفة الشحن:') ?></span>
+                        <span class="value" id="shipping-cost">-</span>
+                    </div>
+                    <div class="summary-row total-row">
+                        <span class="label"><?= __('الإجمالي النهائي:') ?></span>
+                        <span class="value" id="order-total"><?= $block->getCurrentProductFormattedPrice() ?></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Submit Button -->
+            <div class="easyorder-actions">
+                <button type="submit" 
+                        class="action primary easyorder-submit" 
+                        id="easyorder-submit-btn"
+                        disabled>
+                    <span><?= __('اضغط هنا للطلب') ?></span>
+                </button>
+                <div class="loading-overlay" id="loading-overlay" style="display: none;">
+                    <div class="loader"></div>
+                    <span><?= __('جارٍ إنشاء الطلب...') ?></span>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Success Message -->
+    <div id="success-message" class="message success" style="display: none;">
+        <div class="message-content">
+            <strong><?= __('تم إنشاء الطلب بنجاح!') ?></strong>
+            <p id="success-text"></p>
+            <p class="order-info">
+                <?= __('رقم الطلب:') ?> <span id="order-number"></span>
+            </p>
+        </div>
+    </div>
+
+    <!-- Error Message -->
+    <div id="error-message" class="message error" style="display: none;">
+        <div class="message-content">
+            <strong><?= __('حدث خطأ') ?></strong>
+            <p id="error-text"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+require(['jquery', 'mage/url', 'domReady!'], function($, url) {
+    var config = <?= $block->getJsonConfig() ?>;
+    var form = $('#easyorder-form');
+    var submitBtn = $('#easyorder-submit-btn');
+    var loadingOverlay = $('#loading-overlay');
+    
+    // Initialize form handlers
+    initializeFormHandlers();
+    
+    function initializeFormHandlers() {
+        // Quantity controls
+        $('.qty-btn').on('click', function() {
+            var action = $(this).data('action');
+            var qtyInput = $('#easyorder_qty');
+            var currentQty = parseInt(qtyInput.val()) || 1;
+            
+            if (action === 'plus') {
+                qtyInput.val(currentQty + 1);
+            } else if (action === 'minus' && currentQty > 1) {
+                qtyInput.val(currentQty - 1);
+            }
+            
+            updateOrderSummary();
+            updateCalculation();
+        });
+        
+        // Quantity input change
+        $('#easyorder_qty').on('change keyup', function() {
+            var qty = parseInt($(this).val()) || 1;
+            if (qty < 1) {
+                $(this).val(1);
+                qty = 1;
+            }
+            updateOrderSummary();
+            updateCalculation();
+        });
+        
+        // Country change handler
+        $('#country_id').on('change', function() {
+            loadRegions($(this).val());
+            loadShippingMethods();
+            togglePostcodeField($(this).val());
+        });
+        
+        // Region change
+        $('#region_id, #region').on('change', function() {
+            if ($('#country_id').val()) {
+                loadShippingMethods();
+            }
+        });
+        
+        // Address field changes
+        $('#city, #street_1, #street_2, #postcode').on('change', function() {
+            if ($('#country_id').val()) {
+                loadShippingMethods();
+            }
+        });
+        
+        // Payment method change
+        $('input[name="payment_method"]').on('change', function() {
+            checkFormValidity();
+        });
+        
+        // Form validation
+        form.find('input[required], select[required], textarea[required]').on('change blur', function() {
+            checkFormValidity();
+        });
+        
+        // Form submission
+        form.on('submit', function(e) {
+            e.preventDefault();
+            submitOrder();
+        });
+    }
+    
+    function updateOrderSummary() {
+        var qty = parseInt($('#easyorder_qty').val()) || 1;
+        var unitPrice = parseFloat($('#unit-price').data('price')) || 0;
+        var subtotal = qty * unitPrice;
+        
+        $('#qty-display').text(qty);
+        $('#product-subtotal').text(formatPrice(subtotal));
+        
+        // Update total (will be updated again when shipping is calculated)
+        var shippingCost = parseFloat($('#shipping-cost').data('cost')) || 0;
+        var total = subtotal + shippingCost;
+        $('#order-total').text(formatPrice(total));
+    }
+    
+    function loadRegions(countryId) {
+        if (!countryId) {
+            $('#region_id, #region').hide();
+            return;
+        }
+        
+        // Fetch regions for the selected country
+        $.get(config.urls.regions, {
+            country_id: countryId
+        })
+        .done(function(response) {
+            var regionSelect = $('#region_id');
+            var regionInput = $('#region');
+            
+            regionSelect.empty().append('<option value="">' + 'اختر المنطقة' + '</option>');
+            
+            if (response.success && response.regions && response.regions.length > 0) {
+                // Country has regions/states - show dropdown
+                $.each(response.regions, function(index, region) {
+                    regionSelect.append('<option value="' + region.value + '">' + region.label + '</option>');
+                });
+                regionSelect.show();
+                regionInput.hide();
+                regionSelect.addClass('required-entry');
+                regionInput.removeClass('required-entry');
+            } else {
+                // Country has no regions - show text input
+                regionSelect.hide();
+                regionInput.show();
+                regionInput.addClass('required-entry');
+                regionSelect.removeClass('required-entry');
+            }
+        })
+        .fail(function() {
+            // Fallback to text input
+            $('#region_id').hide();
+            $('#region').show().addClass('required-entry');
+        });
+    }
+    
+    function togglePostcodeField(countryId) {
+        // Check if postcode is required for this country
+        var postcodeField = $('#postcode-field');
+        var postcodeInput = $('#postcode');
+        
+        // Countries that typically require postal code
+        var postcodeRequiredCountries = ['US', 'CA', 'GB', 'DE', 'FR', 'IT', 'ES'];
+        
+        if (postcodeRequiredCountries.includes(countryId)) {
+            postcodeField.addClass('required');
+            postcodeInput.addClass('required-entry');
+            postcodeField.find('.label span').text('الرمز البريدي *');
+        } else {
+            postcodeField.removeClass('required');
+            postcodeInput.removeClass('required-entry');
+            postcodeField.find('.label span').text('الرمز البريدي (اختياري)');
+        }
+    }
+    
+    function loadShippingMethods() {
+        var countryId = $('#country_id').val();
+        var regionId = $('#region_id').val();
+        var region = $('#region').val();
+        var postcode = $('#postcode').val();
+        var city = $('#city').val();
+        
+        // التحقق من البيانات المطلوبة
+        if (!countryId) {
+            $('#shipping-section').hide();
+            $('#shipping-methods-container').html('<div class="info-message">يرجى اختيار الدولة أولاً</div>');
+            return;
+        }
+        
+        if (!city) {
+            $('#shipping-section').hide();
+            $('#shipping-methods-container').html('<div class="info-message">يرجى إدخال اسم المدينة</div>');
+            return;
+        }
+        
+        $('#shipping-section').show();
+        $('#shipping-methods-container').html('<div class="loading-message"><i class="fa fa-spinner fa-spin"></i> جارٍ تحميل طرق الشحن...</div>');
+        
+        // إضافة timeout للطلب
+        var xhr = $.post({
+            url: config.urls.shipping,
+            data: {
+                product_id: config.productId,
+                country_id: countryId,
+                region_id: regionId,
+                region: region,
+                postcode: postcode,
+                city: city,
+                form_key: $('input[name="form_key"]').val()
+            },
+            timeout: 10000 // 10 ثواني
+        })
+        .done(function(response) {
+            handleShippingResponse(response);
+        })
+        .fail(function(xhr, status, error) {
+            var errorMsg = 'حدث خطأ في تحميل طرق الشحن';
+            if (status === 'timeout') {
+                errorMsg = 'انتهت مهلة الاتصال. يرجى المحاولة مرة أخرى';
+            }
+            $('#shipping-methods-container').html('<div class="error-message">' + errorMsg + '</div>');
+            console.error('Shipping request failed:', {status: status, error: error});
+        });
+    }
+
+    function handleShippingResponse(response) {
+        console.log('Shipping response:', response);
+        
+        if (response.success && response.shipping_methods && response.shipping_methods.length > 0) {
+            var html = '<div class="shipping-methods-list">';
+            
+            response.shipping_methods.forEach(function(method, index) {
+                var isChecked = index === 0 ? 'checked' : '';
+                html += `
+                    <label class="shipping-method-option">
+                        <input type="radio" 
+                               name="shipping_method" 
+                               value="${method.code}" 
+                               class="shipping-radio" 
+                               data-cost="${method.price}"
+                               ${isChecked}>
+                        <div class="method-info">
+                            <span class="method-title">${method.carrier_title}</span>
+                            <span class="method-description">${method.title}</span>
+                            <span class="method-price">${formatPrice(method.price)}</span>
+                        </div>
+                    </label>
+                `;
+            });
+            
+            html += '</div>';
+            $('#shipping-methods-container').html(html);
+            
+            // تفعيل الطريقة الأولى تلقائياً
+            $('input[name="shipping_method"]:first').trigger('change');
+            
+        } else {
+            var errorMsg = response.message || 'لا توجد طرق شحن متاحة لهذا المكان';
+            $('#shipping-methods-container').html(`
+                <div class="no-shipping-methods">
+                    <i class="fa fa-exclamation-triangle"></i>
+                    <p>${errorMsg}</p>
+                    <small>يرجى التأكد من صحة العنوان أو التواصل مع خدمة العملاء</small>
+                </div>
+            `);
+        }
+    }
+    
+    function updateCalculation() {
+        // This function is called when quantity changes
+        if ($('input[name="shipping_method":checked').length > 0) {
+            $('input[name="shipping_method"]:checked').trigger('change');
+        }
+    }
+    
+    function updateFinalTotal() {
+        var qty = parseInt($('#easyorder_qty').val()) || 1;
+        var unitPrice = parseFloat($('#unit-price').data('price')) || 0;
+        var subtotal = qty * unitPrice;
+        var shippingCost = parseFloat($('#shipping-cost').data('cost')) || 0;
+        var total = subtotal + shippingCost;
+        
+        $('#order-total').text(formatPrice(total));
+    }
+    
+    function checkFormValidity() {
+        var isValid = true;
+        
+        // Check required fields
+        form.find('input[required], select[required], textarea[required]').each(function() {
+            if (!$(this).val().trim()) {
+                isValid = false;
+                return false;
+            }
+        });
+        
+        // Check shipping method selection
+        if (!$('input[name="shipping_method"]:checked').length) {
+            isValid = false;
+        }
+        
+        // Check payment method selection
+        if (!$('input[name="payment_method"]:checked').length) {
+            isValid = false;
+        }
+        
+        submitBtn.prop('disabled', !isValid);
+    }
+    
+    function submitOrder() {
+        if (submitBtn.prop('disabled')) {
+            return;
+        }
+        
+        submitBtn.prop('disabled', true);
+        loadingOverlay.show();
+        hideMessages();
+        
+        // Prepare form data with proper address structure
+        var formData = form.serializeArray();
+        
+        // Add region data properly
+        var regionId = $('#region_id').val();
+        var regionText = $('#region').val();
+        
+        if (regionId) {
+            formData.push({name: 'region_id', value: regionId});
+            formData.push({name: 'region', value: $('#region_id option:selected').text()});
+        } else if (regionText) {
+            formData.push({name: 'region', value: regionText});
+        }
+        
+        $.post(config.urls.submit, formData)
+            .done(function(response) {
+                if (response.success) {
+                    showSuccessMessage(response.message, response.increment_id);
+                    form.hide();
+                } else {
+                    showErrorMessage(response.message || 'حدث خطأ في إنشاء الطلب');
+                    submitBtn.prop('disabled', false);
+                }
+            })
+            .fail(function() {
+                showErrorMessage('حدث خطأ في الاتصال. يرجى المحاولة مرة أخرى.');
+                submitBtn.prop('disabled', false);
+            })
+            .always(function() {
+                loadingOverlay.hide();
+            });
+    }
+    
+    function showSuccessMessage(message, orderNumber) {
+        $('#success-text').text(message);
+        $('#order-number').text(orderNumber);
+        $('#success-message').show();
+        $('html, body').animate({
+            scrollTop: $('#success-message').offset().top - 50
+        }, 500);
+    }
+    
+    function showErrorMessage(message) {
+        $('#error-text').text(message);
+        $('#error-message').show();
+        $('html, body').animate({
+            scrollTop: $('#error-message').offset().top - 50
+        }, 500);
+    }
+    
+    function hideMessages() {
+        $('#success-message, #error-message').hide();
+    }
+    
+    function formatPrice(price) {
+        try {
+            return new Intl.NumberFormat('ar-EG', {
+                style: 'currency',
+                currency: 'EGP'
+            }).format(price);
+        } catch (e) {
+            return price + ' ج.م';
+        }
+    }
+    
+    // Initialize on page load
+    checkFormValidity();
+    updateOrderSummary();
+    
+    // Auto-load regions and shipping if country is pre-selected
+    if ($('#country_id').val()) {
+        loadRegions($('#country_id').val());
+        togglePostcodeField($('#country_id').val());
+    }
+});
+</script>

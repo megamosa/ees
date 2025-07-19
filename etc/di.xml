@@ -1,0 +1,57 @@
+<?xml version="1.0"?>
+<!--
+/**
+ * MagoArab_EasYorder Dependency Injection Configuration (Updated)
+ *
+ * @category    MagoArab
+ * @package     MagoArab_EasYorder
+ * @author      MagoArab Development Team
+ * @copyright   Copyright (c) 2025 MagoArab
+ * @license     https://opensource.org/licenses/MIT MIT License
+ */
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    
+    <!-- Service Contracts -->
+    <preference for="MagoArab\EasYorder\Api\QuickOrderServiceInterface" 
+                type="MagoArab\EasYorder\Model\QuickOrderService"/>
+    
+    <preference for="MagoArab\EasYorder\Api\Data\QuickOrderDataInterface" 
+                type="MagoArab\EasYorder\Model\Data\QuickOrderData"/>
+    
+    <!-- Factories -->
+    <type name="MagoArab\EasYorder\Controller\Order\Create">
+        <arguments>
+            <argument name="quickOrderDataFactory" xsi:type="object">MagoArab\EasYorder\Api\Data\QuickOrderDataInterfaceFactory</argument>
+        </arguments>
+    </type>
+    
+    <!-- Helper Classes -->
+    <type name="MagoArab\EasYorder\Helper\Data">
+        <arguments>
+            <argument name="scopeConfig" xsi:type="object">Magento\Framework\App\Config\ScopeConfigInterface</argument>
+        </arguments>
+    </type>
+    
+    <!-- Block Classes -->
+    <type name="MagoArab\EasYorder\Block\Product\QuickOrder">
+        <arguments>
+            <argument name="helperData" xsi:type="object">MagoArab\EasYorder\Helper\Data</argument>
+            <argument name="quickOrderService" xsi:type="object">MagoArab\EasYorder\Api\QuickOrderServiceInterface</argument>
+            <argument name="registry" xsi:type="object">Magento\Framework\Registry</argument>
+            <argument name="storeManager" xsi:type="object">Magento\Store\Model\StoreManagerInterface</argument>
+            <argument name="priceHelper" xsi:type="object">Magento\Framework\Pricing\Helper\Data</argument>
+            <argument name="countrySource" xsi:type="object">Magento\Directory\Model\Config\Source\Country</argument>
+            <argument name="jsonHelper" xsi:type="object">Magento\Framework\Json\Helper\Data</argument>
+            <argument name="formKey" xsi:type="object">Magento\Framework\Data\Form\FormKey</argument>
+        </arguments>
+    </type>
+    
+    <type name="MagoArab\EasYorder\Model\QuickOrderService">
+        <arguments>
+            <argument name="shippingMethodManagement" xsi:type="object">Magento\Quote\Api\ShippingMethodManagementInterface</argument>
+            <argument name="paymentMethodList" xsi:type="object">Magento\Payment\Api\PaymentMethodListInterface</argument>
+        </arguments>
+    </type>
+</config>
